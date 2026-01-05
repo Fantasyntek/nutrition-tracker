@@ -1,0 +1,96 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import requests
+
+
+@dataclass(frozen=True)
+class OffProduct:
+    code: str
+    name: str
+    brand: str
+    kcal_100g: float | None
+    protein_100g: float | None
+    fat_100g: float | None
+    carbs_100g: float | None
+
+
+class OpenFoodFactsClient:
+    """
+    Минимальный клиент OpenFoodFacts.
+    Документация: https://openfoodfacts.github.io/api-documentation/
+    """
+
+    base_url = "https://world.openfoodfacts.org"
+
+    def search(self, query: str, limit: int = 10) -> list[OffProduct]:
+        query = (query or "").strip()
+        if not query:
+            return []
+
+        params = {
+            "search_terms": query,
+            "search_simple": 1,
+            "action": "process",
+            "json": 1,
+            "page_size": min(max(limit, 1), 30),
+        }
+        r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
+        r.raise_for_status()
+        data = r.json()
+
+        products = []
+        for p in data.get("products", []) or []:
+            code = str(p.get("code") or "").strip()
+            if not code:
+                continue
+
+            nutr = p.get("nutriments") or {}
+            products.append(
+                OffProduct(
+                    code=code,
+                    name=str(p.get("product_name") or p.get("generic_name") or "Без названия").strip(),
+                    brand=str(p.get("brands") or "").strip(),
+                    kcal_100g=_to_float(nutr.get("energy-kcal_100g")),
+                    protein_100g=_to_float(nutr.get("proteins_100g")),
+                    fat_100g=_to_float(nutr.get("fat_100g")),
+                    carbs_100g=_to_float(nutr.get("carbohydrates_100g")),
+                )
+            )
+
+        return products
+
+    def get_product(self, code: str) -> OffProduct | None:
+        code = (code or "").strip()
+        if not code:
+            return None
+
+        r = requests.get(f"{self.base_url}/api/v2/product/{code}.json", timeout=15)
+        r.raise_for_status()
+        data = r.json()
+        if data.get("status") != 1:
+            return None
+
+        p = data.get("product") or {}
+        nutr = p.get("nutriments") or {}
+        return OffProduct(
+            code=code,
+            name=str(p.get("product_name") or p.get("generic_name") or "Без названия").strip(),
+            brand=str(p.get("brands") or "").strip(),
+            kcal_100g=_to_float(nutr.get("energy-kcal_100g")),
+            protein_100g=_to_float(nutr.get("proteins_100g")),
+            fat_100g=_to_float(nutr.get("fat_100g")),
+            carbs_100g=_to_float(nutr.get("carbohydrates_100g")),
+        )
+
+
+def _to_float(v) -> float | None:
+    try:
+        if v is None or v == "":
+            return None
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
