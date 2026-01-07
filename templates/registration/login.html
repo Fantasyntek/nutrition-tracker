@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — FitMacro Planner{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-6 col-lg-5">
+      <div class="bg-white border rounded-3 p-4">
+        <h1 class="h4 mb-3">Вход</h1>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="id_username">Логин</label>
+            <input class="form-control" type="text" name="username" autofocus required id="id_username" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="id_password">Пароль</label>
+            <input class="form-control" type="password" name="password" required id="id_password" />
+          </div>
+
+          {% if form.errors %}
+            <div class="alert alert-danger">Неверный логин или пароль.</div>
+          {% endif %}
+
+          <button class="btn btn-primary w-100" type="submit">Войти</button>
+        </form>
+        <div class="text-secondary small mt-3">
+          Регистрацию можно делать через админку или добавить отдельную страницу позже.
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+

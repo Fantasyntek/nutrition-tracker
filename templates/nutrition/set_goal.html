@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Цель — FitMacro Planner{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Цель</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">Назад</a>
+  </div>
+
+  <div class="bg-white border rounded-3 p-3">
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+
+      <div class="col-12 col-md-6">
+        {{ form.start_date.label_tag }}
+        {{ form.start_date }}
+      </div>
+      <div class="col-12 col-md-6">
+        {{ form.target_date.label_tag }}
+        {{ form.target_date }}
+      </div>
+
+      <div class="col-12 col-md-6">
+        {{ form.start_weight_kg.label_tag }}
+        {{ form.start_weight_kg }}
+      </div>
+      <div class="col-12 col-md-6">
+        {{ form.target_weight_kg.label_tag }}
+        {{ form.target_weight_kg }}
+      </div>
+
+      <div class="col-12">
+        {{ form.daily_kcal_target.label_tag }}
+        {{ form.daily_kcal_target }}
+      </div>
+
+      <div class="col-12 col-lg-4">
+        {{ form.daily_protein_target.label_tag }}
+        {{ form.daily_protein_target }}
+      </div>
+      <div class="col-12 col-lg-4">
+        {{ form.daily_fat_target.label_tag }}
+        {{ form.daily_fat_target }}
+      </div>
+      <div class="col-12 col-lg-4">
+        {{ form.daily_carb_target.label_tag }}
+        {{ form.daily_carb_target }}
+      </div>
+
+      {% if form.errors %}
+        <div class="col-12">
+          <div class="alert alert-danger mb-0">Проверьте поля формы.</div>
+        </div>
+      {% endif %}
+
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit">Сохранить цель</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+

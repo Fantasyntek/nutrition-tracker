@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить еду — FitMacro Planner{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Добавить еду</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">Назад</a>
+  </div>
+
+  <div class="bg-white border rounded-3 p-3">
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-12 col-md-4">
+        {{ form.date.label_tag }}
+        {{ form.date }}
+      </div>
+      <div class="col-12 col-md-4">
+        {{ form.type.label_tag }}
+        {{ form.type }}
+      </div>
+      <div class="col-12 col-md-4">
+        {{ form.grams.label_tag }}
+        {{ form.grams }}
+      </div>
+      <div class="col-12">
+        {{ form.food_item.label_tag }}
+        {{ form.food_item }}
+        <div class="form-text">Если продукта нет — импортируй его на странице «Импорт продуктов».</div>
+      </div>
+
+      {% if form.errors %}
+        <div class="col-12">
+          <div class="alert alert-danger mb-0">Проверьте поля формы.</div>
+        </div>
+      {% endif %}
+
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+

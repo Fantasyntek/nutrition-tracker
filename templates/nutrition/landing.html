@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}FitMacro Planner{% endblock %}
+
+{% block content %}
+  <div class="bg-white border rounded-3 p-4 p-lg-5">
+    <h1 class="display-6 fw-semibold">FitMacro Planner</h1>
+    <p class="text-secondary fs-5 mb-4">
+      Дневник питания с подсчётом КБЖУ, целями и графиками прогресса. Импорт продуктов из OpenFoodFacts.
+    </p>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-primary btn-lg" href="{% url 'login' %}">Войти</a>
+      <a class="btn btn-outline-secondary btn-lg" href="/admin/">Админка</a>
+    </div>
+
+    <hr class="my-4" />
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="p-3 bg-body-tertiary rounded-3 h-100">
+          <div class="fw-semibold">КБЖУ</div>
+          <div class="text-secondary small">Автоматический расчёт по граммовке и нутриентам.</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="p-3 bg-body-tertiary rounded-3 h-100">
+          <div class="fw-semibold">Цели</div>
+          <div class="text-secondary small">Суточная цель по калориям и (опционально) макросам.</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="p-3 bg-body-tertiary rounded-3 h-100">
+          <div class="fw-semibold">Аналитика</div>
+          <div class="text-secondary small">Графики и сводки по дням/неделям.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+
