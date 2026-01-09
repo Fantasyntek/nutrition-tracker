@@ -31,6 +31,39 @@
         {% endif %}
 
         <hr />
+        <div class="fw-semibold mb-2">Сегодня</div>
+        <div class="mb-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-secondary">Калории:</span>
+            <span class="fw-semibold">{{ today_kcal }} / {% if goal %}{{ goal.daily_kcal_target }}{% else %}—{% endif %}</span>
+          </div>
+          {% if goal %}
+            {% if goal.daily_protein_target %}
+              <div class="d-flex justify-content-between">
+                <span class="text-secondary">Белки:</span>
+                <span class="fw-semibold">{{ today_protein }}г / {{ goal.daily_protein_target }}г</span>
+              </div>
+            {% endif %}
+            {% if goal.daily_fat_target %}
+              <div class="d-flex justify-content-between">
+                <span class="text-secondary">Жиры:</span>
+                <span class="fw-semibold">{{ today_fat }}г / {{ goal.daily_fat_target }}г</span>
+              </div>
+            {% endif %}
+            {% if goal.daily_carb_target %}
+              <div class="d-flex justify-content-between">
+                <span class="text-secondary">Углеводы:</span>
+                <span class="fw-semibold">{{ today_carb }}г / {{ goal.daily_carb_target }}г</span>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="text-secondary small">Белки: {{ today_protein }}г</div>
+            <div class="text-secondary small">Жиры: {{ today_fat }}г</div>
+            <div class="text-secondary small">Углеводы: {{ today_carb }}г</div>
+          {% endif %}
+        </div>
+
+        <hr />
         <div class="fw-semibold mb-2">Последний вес</div>
         {% if latest_weight %}
           <div class="h4 mb-0">{{ latest_weight.weight_kg }} кг</div>
@@ -38,15 +71,43 @@
         {% else %}
           <div class="text-secondary">Нет данных. Нажми «Добавить вес».</div>
         {% endif %}
+
+        {% if weight_forecast %}
+          <hr />
+          <div class="fw-semibold mb-2">Прогноз веса</div>
+          <div class="h5 mb-1">{{ weight_forecast.predicted_weight }} кг</div>
+          <div class="text-secondary small">
+            {% if weight_forecast.weight_change > 0 %}
+              +{{ weight_forecast.weight_change }} кг
+            {% else %}
+              {{ weight_forecast.weight_change }} кг
+            {% endif %}
+            (дефицит: {{ weight_forecast.deficit_kcal }} ккал)
+          </div>
+        {% endif %}
       </div>
     </div>
 
     <div class="col-12 col-lg-8">
-      <div class="bg-white border rounded-3 p-3 h-100">
-        <div class="fw-semibold mb-2">Калории за последние 14 дней</div>
-        <div>
-          {{ calories_chart_html|safe }}
+      <div class="row g-4">
+        <div class="col-12">
+          <div class="bg-white border rounded-3 p-3">
+            <div class="fw-semibold mb-2">Калории за последние 14 дней</div>
+            <div>
+              {{ calories_chart_html|safe }}
+            </div>
+          </div>
         </div>
+        {% if weight_chart_html %}
+          <div class="col-12">
+            <div class="bg-white border rounded-3 p-3">
+              <div class="fw-semibold mb-2">Динамика веса</div>
+              <div>
+                {{ weight_chart_html|safe }}
+              </div>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
