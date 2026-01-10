@@ -3,8 +3,54 @@ from __future__ import annotations
 import datetime as dt
 
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 
 from .models import FoodItem, Goal, Meal, MealItem, WeightLog
+
+User = get_user_model()
+
+
+class CustomDateInput(forms.DateInput):
+    """Кастомный виджет для выбора даты с Bootstrap стилями."""
+
+    def __init__(self, attrs=None):
+        default_attrs = {"class": "form-control", "type": "date"}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs, format="%Y-%m-%d")
+
+
+class CustomSelect(forms.Select):
+    """Кастомный виджет для выбора с Bootstrap стилями."""
+
+    def __init__(self, attrs=None):
+        default_attrs = {"class": "form-select"}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(attrs=default_attrs)
+
+
+class UserRegistrationForm(UserCreationForm):
+    """Форма регистрации пользователя."""
+
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
+    )
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2")
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["password1"].widget.attrs.update({"class": "form-control"})
+        self.fields["password2"].widget.attrs.update({"class": "form-control"})
 
 
 class FoodSearchForm(forms.Form):
@@ -20,12 +66,12 @@ class AddMealItemForm(forms.Form):
     date = forms.DateField(
         label="Дата",
         initial=dt.date.today,
-        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        widget=CustomDateInput(),
     )
     type = forms.ChoiceField(
         label="Приём пищи",
         choices=Meal.Type.choices,
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=CustomSelect(),
     )
     food_item = forms.ModelChoiceField(
         label="Продукт",
@@ -54,7 +100,7 @@ class WeightLogForm(forms.ModelForm):
         model = WeightLog
         fields = ["date", "weight_kg"]
         widgets = {
-            "date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "date": CustomDateInput(),
             "weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
         }
 
@@ -80,8 +126,8 @@ class GoalForm(forms.ModelForm):
             "daily_carb_target",
         ]
         widgets = {
-            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "target_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "start_date": CustomDateInput(),
+            "target_date": CustomDateInput(),
             "start_weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "target_weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "daily_kcal_target": forms.NumberInput(attrs={"class": "form-control", "min": 1}),

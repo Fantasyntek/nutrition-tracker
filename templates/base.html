@@ -20,6 +20,7 @@
             <span class="text-secondary small">{{ user.username }}</span>
             <a class="btn btn-outline-secondary btn-sm" href="{% url 'logout' %}">Выйти</a>
           {% else %}
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'nutrition:register' %}">Регистрация</a>
             <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}">Войти</a>
           {% endif %}
         </div>

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — FitMacro Planner{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-6 col-lg-5">
+      <div class="bg-white border rounded-3 p-4">
+        <h1 class="h4 mb-3">Регистрация</h1>
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="text-danger small">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <div class="text-danger small">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+              <div class="text-danger small">{{ form.password1.errors }}</div>
+            {% endif %}
+            {% if form.password1.help_text %}
+              <div class="form-text">{{ form.password1.help_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+              <div class="text-danger small">{{ form.password2.errors }}</div>
+            {% endif %}
+            {% if form.password2.help_text %}
+              <div class="form-text">{{ form.password2.help_text }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <button class="btn btn-primary w-100" type="submit">Зарегистрироваться</button>
+        </form>
+        <div class="text-center mt-3">
+          <a href="{% url 'login' %}" class="text-secondary small">Уже есть аккаунт? Войти</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

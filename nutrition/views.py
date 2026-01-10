@@ -11,7 +11,7 @@ from django.db.models.functions import Cast
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from .forms import AddMealItemForm, FoodSearchForm, GoalForm, WeightLogForm
+from .forms import AddMealItemForm, FoodSearchForm, GoalForm, UserRegistrationForm, WeightLogForm
 from .models import FoodItem, Goal, MealItem, WeightLog
 from .services.openfoodfacts import OpenFoodFactsClient
 
@@ -236,3 +236,23 @@ def set_goal(request):
         form = GoalForm(instance=goal, initial={"start_date": timezone.localdate()})
 
     return render(request, "nutrition/set_goal.html", {"form": form})
+
+
+def register(request):
+    """Регистрация нового пользователя."""
+    if request.user.is_authenticated:
+        return redirect("nutrition:dashboard")
+
+    if request.method == "POST":
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f"Регистрация успешна! Добро пожаловать, {user.username}.")
+            from django.contrib.auth import login
+
+            login(request, user)
+            return redirect("nutrition:dashboard")
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, "registration/register.html", {"form": form})
