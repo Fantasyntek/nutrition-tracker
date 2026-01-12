@@ -12,10 +12,10 @@ User = get_user_model()
 
 
 class CustomDateInput(forms.DateInput):
-    """Кастомный виджет для выбора даты с Bootstrap стилями."""
+    """Кастомный виджет для выбора даты с flatpickr."""
 
     def __init__(self, attrs=None):
-        default_attrs = {"class": "form-control", "type": "date"}
+        default_attrs = {"class": "form-control custom-date", "placeholder": "дд.мм.гггг"}
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs, format="%Y-%m-%d")
@@ -58,8 +58,32 @@ class FoodSearchForm(forms.Form):
         label="Поиск продукта",
         max_length=120,
         required=True,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Например: yogurt"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Например: йогурт, хлеб, курица"}),
     )
+
+
+class ManualFoodItemForm(forms.ModelForm):
+    """Форма для ручного добавления продукта."""
+
+    class Meta:
+        model = FoodItem
+        fields = ["name", "brand", "kcal_per_100g", "protein_per_100g", "fat_per_100g", "carb_per_100g"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Название продукта"}),
+            "brand": forms.TextInput(attrs={"class": "form-control", "placeholder": "Бренд (необязательно)"}),
+            "kcal_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "protein_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "fat_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "carb_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+        }
+        labels = {
+            "name": "Название",
+            "brand": "Бренд",
+            "kcal_per_100g": "Калории (на 100г)",
+            "protein_per_100g": "Белки (на 100г, г)",
+            "fat_per_100g": "Жиры (на 100г, г)",
+            "carb_per_100g": "Углеводы (на 100г, г)",
+        }
 
 
 class AddMealItemForm(forms.Form):

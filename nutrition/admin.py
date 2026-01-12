@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from .models import FoodItem, Goal, Meal, MealItem, WeightLog
 
@@ -8,6 +9,9 @@ class FoodItemAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "brand", "kcal_per_100g", "source", "created_at")
     list_filter = ("source",)
     search_fields = ("name", "brand", "external_id")
+    
+    class Media:
+        js = ('admin/js/change_form.js',)
 
 
 class MealItemInline(admin.TabularInline):

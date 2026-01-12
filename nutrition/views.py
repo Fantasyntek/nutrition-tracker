@@ -11,7 +11,7 @@ from django.db.models.functions import Cast
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
-from .forms import AddMealItemForm, FoodSearchForm, GoalForm, UserRegistrationForm, WeightLogForm
+from .forms import AddMealItemForm, FoodSearchForm, GoalForm, ManualFoodItemForm, UserRegistrationForm, WeightLogForm
 from .models import FoodItem, Goal, MealItem, WeightLog
 from .services.openfoodfacts import OpenFoodFactsClient
 
@@ -256,3 +256,20 @@ def register(request):
         form = UserRegistrationForm()
 
     return render(request, "registration/register.html", {"form": form})
+
+
+@login_required
+def add_food_manual(request):
+    """Ручное добавление продукта в базу."""
+    if request.method == "POST":
+        form = ManualFoodItemForm(request.POST)
+        if form.is_valid():
+            food = form.save(commit=False)
+            food.source = FoodItem.Source.MANUAL
+            food.save()
+            messages.success(request, f"Продукт '{food.name}' добавлен в базу.")
+            return redirect("nutrition:food_search")
+    else:
+        form = ManualFoodItemForm()
+
+    return render(request, "nutrition/add_food_manual.html", {"form": form})

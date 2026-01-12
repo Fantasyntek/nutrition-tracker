@@ -29,16 +29,25 @@ class OpenFoodFactsClient:
         if not query:
             return []
 
+        # Пробуем поиск на русском языке (российская база)
         params = {
             "search_terms": query,
             "search_simple": 1,
             "action": "process",
             "json": 1,
             "page_size": min(max(limit, 1), 30),
+            "countries_tags_en": "russia",  # Приоритет российским продуктам
         }
-        r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
-        r.raise_for_status()
-        data = r.json()
+        try:
+            r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
+            # Если не получилось, пробуем без фильтра по стране
+            params.pop("countries_tags_en", None)
+            r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
+            r.raise_for_status()
+            data = r.json()
 
         products = []
         for p in data.get("products", []) or []:

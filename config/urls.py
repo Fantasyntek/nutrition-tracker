@@ -19,6 +19,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+# Локализация админки
+admin.site.site_header = "FitMacro Planner — Администрирование"
+admin.site.site_title = "FitMacro Planner"
+admin.site.index_title = "Панель управления"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('nutrition.urls')),
