@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Цель — FitMacro Planner{% endblock %}
+{% block title %}{% if request.session.django_language == 'en' %}Goal{% else %}Цель{% endif %} — FitMacro Planner{% endblock %}
 
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Цель</h1>
-    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">Назад</a>
+    <h1 class="h3 mb-0">{% if request.session.django_language == 'en' %}Goal{% else %}Цель{% endif %}</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">{% if request.session.django_language == 'en' %}Back{% else %}Назад{% endif %}</a>
   </div>
 
   <div class="bg-white border rounded-3 p-3">
@@ -55,7 +56,7 @@
       {% endif %}
 
       <div class="col-12">
-        <button class="btn btn-primary" type="submit">Сохранить цель</button>
+        <button class="btn btn-primary" type="submit">{% if request.session.django_language == 'en' %}Save Goal{% else %}Сохранить цель{% endif %}</button>
       </div>
     </form>
   </div>

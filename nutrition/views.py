@@ -10,6 +10,7 @@ from django.db.models import F, FloatField, Sum
 from django.db.models.functions import Cast
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
 
 from .forms import AddMealItemForm, FoodSearchForm, GoalForm, ManualFoodItemForm, UserRegistrationForm, WeightLogForm
 from .models import FoodItem, Goal, MealItem, WeightLog
@@ -273,3 +274,12 @@ def add_food_manual(request):
         form = ManualFoodItemForm()
 
     return render(request, "nutrition/add_food_manual.html", {"form": form})
+
+
+@require_http_methods(["POST"])
+def set_language(request):
+    """Простое переключение языка через сессию."""
+    lang = request.POST.get("language", "ru")
+    if lang in ["ru", "en"]:
+        request.session["django_language"] = lang
+    return redirect(request.POST.get("next", "/"))

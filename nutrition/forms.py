@@ -22,10 +22,10 @@ class CustomDateInput(forms.DateInput):
 
 
 class CustomSelect(forms.Select):
-    """Кастомный виджет для выбора с Bootstrap стилями."""
+    """Кастомный виджет для выбора с Choices.js стилями."""
 
     def __init__(self, attrs=None):
-        default_attrs = {"class": "form-select"}
+        default_attrs = {"class": "form-select custom-select"}
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs)
