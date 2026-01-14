@@ -100,7 +100,7 @@ class AddMealItemForm(forms.Form):
     food_item = forms.ModelChoiceField(
         label="Продукт",
         queryset=FoodItem.objects.all(),
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=CustomSelect(),
     )
     grams = forms.DecimalField(
         label="Граммы",

@@ -11,6 +11,7 @@ from django.db.models.functions import Cast
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import logout as auth_logout
 
 from .forms import AddMealItemForm, FoodSearchForm, GoalForm, ManualFoodItemForm, UserRegistrationForm, WeightLogForm
 from .models import FoodItem, Goal, MealItem, WeightLog
@@ -283,3 +284,14 @@ def set_language(request):
     if lang in ["ru", "en"]:
         request.session["django_language"] = lang
     return redirect(request.POST.get("next", "/"))
+
+
+@require_http_methods(["GET", "POST"])
+def logout_view(request):
+    """
+    Logout, который не падает 405 при GET.
+    Django LogoutView по умолчанию требует POST — это ок, но в учебном проекте
+    удобнее поддержать и GET (чтобы не ловить «Страница недоступна»).
+    """
+    auth_logout(request)
+    return redirect("/")

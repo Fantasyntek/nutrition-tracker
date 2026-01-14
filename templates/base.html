@@ -18,13 +18,34 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
     />
+    <style>
+      /* Choices.js: визуально ближе к flatpickr/Bootstrap (скругления и высота) */
+      .choices__inner {
+        border-radius: 0.5rem !important;
+        min-height: calc(1.5em + 0.75rem + 2px);
+        padding: 0.375rem 0.75rem;
+        border-color: #dee2e6;
+        background-color: #fff;
+      }
+      .choices[data-type*="select-one"] .choices__inner {
+        padding-bottom: 0.375rem;
+      }
+      .choices__list--dropdown {
+        border-radius: 0.75rem;
+        border-color: #dee2e6;
+        overflow: hidden;
+      }
+      .choices__list--dropdown .choices__item--selectable.is-highlighted {
+        background: rgba(13, 110, 253, 0.12);
+      }
+    </style>
   </head>
   <body class="bg-body-tertiary">
     <nav class="navbar navbar-expand-lg bg-white border-bottom">
       <div class="container">
-        <a class="navbar-brand fw-semibold" href="/">FitMacro Planner</a>
+        {% load tr %}
+        <a class="navbar-brand fw-semibold" href="/">{% tr ru="КБЖУ Трекер" en="NutriTracker" %}</a>
         <div class="ms-auto d-flex gap-2 align-items-center">
-          {% load i18n %}
           <form action="{% url 'set_language' %}" method="post" class="d-inline">
             {% csrf_token %}
             <input name="next" type="hidden" value="{{ request.path }}" />
@@ -39,11 +60,11 @@
             <span class="text-secondary small">{{ user.username }}</span>
             <form method="post" action="{% url 'logout' %}" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="btn btn-outline-secondary btn-sm">{% trans "Выйти" %}</button>
+              <button type="submit" class="btn btn-outline-secondary btn-sm">{% tr ru="Выйти" en="Logout" %}</button>
             </form>
           {% else %}
-            <a class="btn btn-outline-secondary btn-sm" href="{% url 'nutrition:register' %}">{% trans "Регистрация" %}</a>
-            <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}">{% trans "Войти" %}</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'nutrition:register' %}">{% tr ru="Регистрация" en="Sign up" %}</a>
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}">{% tr ru="Войти" en="Sign in" %}</a>
           {% endif %}
         </div>
       </div>
