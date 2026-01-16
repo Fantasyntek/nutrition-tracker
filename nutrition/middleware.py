@@ -1,4 +1,4 @@
-"""Middleware для переключения языков через сессию."""
+"""Middleware для переключения языков и темы."""
 
 
 class LanguageMiddleware:
@@ -21,6 +21,14 @@ class LanguageMiddleware:
 
         # Устанавливаем язык в request
         request.LANGUAGE_CODE = lang
+
+        # Тема: сначала cookie (переживает logout), затем session, иначе light.
+        theme = (request.COOKIES.get("theme") or request.session.get("theme") or "light").strip().lower()
+        theme = "dark" if theme == "dark" else "light"
+        request.theme = theme  # удобный атрибут для шаблонов
+        # синхронизируем сессию, если там пусто (не обязательно, но удобно)
+        if request.session.get("theme") not in ("light", "dark"):
+            request.session["theme"] = theme
 
         response = self.get_response(request)
         return response

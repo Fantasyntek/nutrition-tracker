@@ -1,114 +1,119 @@
 {% extends "base.html" %}
+{% load tr %}
 
-{% block title %}Дашборд — FitMacro Planner{% endblock %}
+{% block title %}{% tr ru="Дашборд" en="Dashboard" %} — FitMacro Planner{% endblock %}
 
 {% block content %}
-  <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
     <div>
-      <h1 class="h3 mb-1">Дашборд</h1>
-      <div class="text-secondary small">Сегодня: {{ today }}</div>
+      <h1 class="text-3xl font-semibold">{% tr ru="Дашборд" en="Dashboard" %}</h1>
+      <div class="text-sm opacity-70">{% tr ru="Сегодня" en="Today" %}: {{ today|date:"Y-m-d" }}</div>
     </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary" href="{% url 'nutrition:food_search' %}">Импорт продуктов</a>
-      <a class="btn btn-primary" href="{% url 'nutrition:add_meal_item' %}">Добавить еду</a>
-      <a class="btn btn-outline-primary" href="{% url 'nutrition:add_weight' %}">Добавить вес</a>
-      <a class="btn btn-outline-secondary" href="{% url 'nutrition:set_goal' %}">Цель</a>
+    <div class="flex flex-wrap gap-2">
+      <a class="btn btn-outline btn-sm" href="{% url 'nutrition:food_search' %}">{% tr ru="Импорт продуктов" en="Import foods" %}</a>
+      <a class="btn btn-primary btn-sm" href="{% url 'nutrition:add_meal_item' %}">{% tr ru="Добавить еду" en="Add food" %}</a>
+      <a class="btn btn-outline btn-sm" href="{% url 'nutrition:add_weight' %}">{% tr ru="Добавить вес" en="Add weight" %}</a>
+      <a class="btn btn-outline btn-sm" href="{% url 'nutrition:set_goal' %}">{% tr ru="Цель" en="Goal" %}</a>
     </div>
   </div>
 
-  <div class="row g-4">
-    <div class="col-12 col-lg-4">
-      <div class="bg-white border rounded-3 p-3 h-100">
-        <div class="fw-semibold mb-2">Активная цель</div>
-        {% if goal %}
-          <div class="display-6 lh-1">{{ goal.daily_kcal_target }}</div>
-          <div class="text-secondary">ккал в день</div>
-          {% if goal.target_weight_kg %}
-            <div class="mt-3 text-secondary small">Цель по весу: {{ goal.target_weight_kg }} кг</div>
-          {% endif %}
-        {% else %}
-          <div class="text-secondary">Пока не задана. Нажми «Цель».</div>
-        {% endif %}
-
-        <hr />
-        <div class="fw-semibold mb-2">Сегодня</div>
-        <div class="mb-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-secondary">Калории:</span>
-            <span class="fw-semibold">{{ today_kcal }} / {% if goal %}{{ goal.daily_kcal_target }}{% else %}—{% endif %}</span>
-          </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+      <div class="card-body gap-3">
+        <div>
+          <div class="font-semibold mb-1">{% tr ru="Активная цель" en="Active goal" %}</div>
           {% if goal %}
-            {% if goal.daily_protein_target %}
-              <div class="d-flex justify-content-between">
-                <span class="text-secondary">Белки:</span>
-                <span class="fw-semibold">{{ today_protein }}г / {{ goal.daily_protein_target }}г</span>
-              </div>
-            {% endif %}
-            {% if goal.daily_fat_target %}
-              <div class="d-flex justify-content-between">
-                <span class="text-secondary">Жиры:</span>
-                <span class="fw-semibold">{{ today_fat }}г / {{ goal.daily_fat_target }}г</span>
-              </div>
-            {% endif %}
-            {% if goal.daily_carb_target %}
-              <div class="d-flex justify-content-between">
-                <span class="text-secondary">Углеводы:</span>
-                <span class="fw-semibold">{{ today_carb }}г / {{ goal.daily_carb_target }}г</span>
-              </div>
+            <div class="text-4xl font-bold leading-none">{{ goal.daily_kcal_target }}</div>
+            <div class="opacity-70">{% tr ru="ккал в день" en="kcal/day" %}</div>
+            {% if goal.target_weight_kg %}
+              <div class="mt-2 text-sm opacity-70">{% tr ru="Цель по весу" en="Target weight" %}: {{ goal.target_weight_kg }} {% tr ru="кг" en="kg" %}</div>
             {% endif %}
           {% else %}
-            <div class="text-secondary small">Белки: {{ today_protein }}г</div>
-            <div class="text-secondary small">Жиры: {{ today_fat }}г</div>
-            <div class="text-secondary small">Углеводы: {{ today_carb }}г</div>
+            <div class="opacity-70">{% tr ru="Пока не задана. Нажми «Цель»." en="Not set yet. Click “Goal”." %}</div>
           {% endif %}
         </div>
 
-        <hr />
-        <div class="fw-semibold mb-2">Последний вес</div>
-        {% if latest_weight %}
-          <div class="h4 mb-0">{{ latest_weight.weight_kg }} кг</div>
-          <div class="text-secondary small">{{ latest_weight.date }}</div>
-        {% else %}
-          <div class="text-secondary">Нет данных. Нажми «Добавить вес».</div>
-        {% endif %}
+        <div class="divider my-1"></div>
+
+        <div>
+          <div class="font-semibold mb-2">{% tr ru="Сегодня" en="Today" %}</div>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between"><span class="opacity-70">{% tr ru="Калории" en="Calories" %}:</span><span class="font-semibold">{{ today_kcal }} / {% if goal %}{{ goal.daily_kcal_target }}{% else %}—{% endif %}</span></div>
+            {% if progress.kcal is not None %}
+              <div class="progress" role="progressbar" aria-label="{% tr ru='Прогресс калорий' en='Calories progress' %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.kcal }}">
+                <div class="progress__bar" style="width: {{ progress.kcal }}%"></div>
+              </div>
+            {% endif %}
+            <div class="flex justify-between"><span class="opacity-70">{% tr ru="Белки" en="Protein" %}:</span><span class="font-semibold">{{ today_protein }}г{% if goal and goal.daily_protein_target %} / {{ goal.daily_protein_target }}г{% endif %}</span></div>
+            {% if progress.protein is not None %}
+              <div class="progress" role="progressbar" aria-label="{% tr ru='Прогресс белков' en='Protein progress' %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.protein }}">
+                <div class="progress__bar" style="width: {{ progress.protein }}%"></div>
+              </div>
+            {% endif %}
+            <div class="flex justify-between"><span class="opacity-70">{% tr ru="Жиры" en="Fat" %}:</span><span class="font-semibold">{{ today_fat }}г{% if goal and goal.daily_fat_target %} / {{ goal.daily_fat_target }}г{% endif %}</span></div>
+            {% if progress.fat is not None %}
+              <div class="progress" role="progressbar" aria-label="{% tr ru='Прогресс жиров' en='Fat progress' %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.fat }}">
+                <div class="progress__bar" style="width: {{ progress.fat }}%"></div>
+              </div>
+            {% endif %}
+            <div class="flex justify-between"><span class="opacity-70">{% tr ru="Углеводы" en="Carbs" %}:</span><span class="font-semibold">{{ today_carb }}г{% if goal and goal.daily_carb_target %} / {{ goal.daily_carb_target }}г{% endif %}</span></div>
+            {% if progress.carb is not None %}
+              <div class="progress" role="progressbar" aria-label="{% tr ru='Прогресс углеводов' en='Carbs progress' %}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.carb }}">
+                <div class="progress__bar" style="width: {{ progress.carb }}%"></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="divider my-1"></div>
+
+        <div>
+          <div class="font-semibold mb-1">{% tr ru="Последний вес" en="Latest weight" %}</div>
+          {% if latest_weight %}
+            <div class="text-2xl font-bold">{{ latest_weight.weight_kg }} {% tr ru="кг" en="kg" %}</div>
+            <div class="text-sm opacity-70">{{ latest_weight.date|date:"Y-m-d" }}</div>
+          {% else %}
+            <div class="opacity-70">{% tr ru="Нет данных. Нажми «Добавить вес»." en="No data. Click “Add weight”." %}</div>
+          {% endif %}
+        </div>
 
         {% if weight_forecast %}
-          <hr />
-          <div class="fw-semibold mb-2">Прогноз веса</div>
-          <div class="h5 mb-1">{{ weight_forecast.predicted_weight }} кг</div>
-          <div class="text-secondary small">
-            {% if weight_forecast.weight_change > 0 %}
-              +{{ weight_forecast.weight_change }} кг
-            {% else %}
-              {{ weight_forecast.weight_change }} кг
-            {% endif %}
-            (дефицит: {{ weight_forecast.deficit_kcal }} ккал)
+          <div class="divider my-1"></div>
+          <div>
+            <div class="font-semibold mb-1">{% tr ru="Прогноз веса" en="Weight forecast" %}</div>
+            <div class="text-xl font-bold">{{ weight_forecast.predicted_weight }} {% tr ru="кг" en="kg" %}</div>
+            <div class="text-sm opacity-70">
+              {% if weight_forecast.weight_change > 0 %}
+                +{{ weight_forecast.weight_change }} {% tr ru="кг" en="kg" %}
+              {% else %}
+                {{ weight_forecast.weight_change }} {% tr ru="кг" en="kg" %}
+              {% endif %}
+              ({% tr ru="дефицит" en="deficit" %}: {{ weight_forecast.deficit_kcal }} {% tr ru="ккал" en="kcal" %})
+            </div>
           </div>
         {% endif %}
       </div>
     </div>
 
-    <div class="col-12 col-lg-8">
-      <div class="row g-4">
-        <div class="col-12">
-          <div class="bg-white border rounded-3 p-3">
-            <div class="fw-semibold mb-2">Калории за последние 14 дней</div>
-            <div>
-              {{ calories_chart_html|safe }}
+    <div class="lg:col-span-2 space-y-4">
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+          <div class="font-semibold mb-2">{% tr ru="Калории за последние 14 дней" en="Calories (last 14 days)" %}</div>
+          <div class="w-full overflow-x-auto">
+            {{ calories_chart_html|safe }}
+          </div>
+        </div>
+      </div>
+      {% if weight_chart_html %}
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+          <div class="card-body">
+            <div class="font-semibold mb-2">{% tr ru="Динамика веса" en="Weight trend" %}</div>
+            <div class="w-full overflow-x-auto">
+              {{ weight_chart_html|safe }}
             </div>
           </div>
         </div>
-        {% if weight_chart_html %}
-          <div class="col-12">
-            <div class="bg-white border rounded-3 p-3">
-              <div class="fw-semibold mb-2">Динамика веса</div>
-              <div>
-                {{ weight_chart_html|safe }}
-              </div>
-            </div>
-          </div>
-        {% endif %}
-      </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

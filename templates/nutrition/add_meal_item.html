@@ -1,44 +1,49 @@
 {% extends "base.html" %}
+{% load tr %}
 
-{% block title %}Добавить еду — FitMacro Planner{% endblock %}
+{% block title %}{% tr ru="Добавить еду" en="Add food" %} — FitMacro Planner{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Добавить еду</h1>
-    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">Назад</a>
+  <div class="flex items-end justify-between mb-4">
+    <h1 class="text-3xl font-semibold">{% tr ru="Добавить еду" en="Add food" %}</h1>
+    <a class="btn btn-ghost btn-sm" href="{% url 'nutrition:dashboard' %}">{% tr ru="Назад" en="Back" %}</a>
   </div>
 
-  <div class="bg-white border rounded-3 p-3">
-    <form method="post" class="row g-3">
-      {% csrf_token %}
-      <div class="col-12 col-md-4">
-        {{ form.date.label_tag }}
-        {{ form.date }}
-      </div>
-      <div class="col-12 col-md-4">
-        {{ form.type.label_tag }}
-        {{ form.type }}
-      </div>
-      <div class="col-12 col-md-4">
-        {{ form.grams.label_tag }}
-        {{ form.grams }}
-      </div>
-      <div class="col-12">
-        {{ form.food_item.label_tag }}
-        {{ form.food_item }}
-        <div class="form-text">Если продукта нет — импортируй его на странице «Импорт продуктов».</div>
-      </div>
-
-      {% if form.errors %}
-        <div class="col-12">
-          <div class="alert alert-danger mb-0">Проверьте поля формы.</div>
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body">
+      <form method="post" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {% csrf_token %}
+        <div class="md:col-span-1">
+          {{ form.date.label_tag }}
+          {{ form.date }}
         </div>
-      {% endif %}
+        <div class="md:col-span-1">
+          {{ form.type.label_tag }}
+          {{ form.type }}
+        </div>
+        <div class="md:col-span-1">
+          {{ form.grams.label_tag }}
+          {{ form.grams }}
+        </div>
+        <div class="md:col-span-3">
+          {{ form.food_item.label_tag }}
+          {{ form.food_item }}
+          <div class="text-xs opacity-70 mt-1">
+            {% tr ru="Если продукта нет — импортируй его на странице «Импорт продуктов»." en="If the food is missing, import it on the “Import foods” page." %}
+          </div>
+        </div>
 
-      <div class="col-12">
-        <button class="btn btn-primary" type="submit">Сохранить</button>
-      </div>
-    </form>
+        {% if form.errors %}
+          <div class="md:col-span-3">
+            <div class="alert alert-error"><span>{% tr ru="Проверьте поля формы." en="Please check the form fields." %}</span></div>
+          </div>
+        {% endif %}
+
+        <div class="md:col-span-3">
+          <button class="btn btn-primary" type="submit">{% tr ru="Сохранить" en="Save" %}</button>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}
 

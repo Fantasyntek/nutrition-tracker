@@ -19,10 +19,41 @@ from .services.openfoodfacts import OpenFoodFactsClient
 
 # Create your views here.
 
+def _t(request, ru: str, en: str) -> str:
+    return en if request.session.get("django_language") == "en" else ru
+
+
+def _get_theme(request) -> str:
+    # Theme is persisted in cookie so it survives logout (session reset).
+    theme = (request.COOKIES.get("theme") or request.session.get("theme") or "light").strip().lower()
+    return "dark" if theme == "dark" else "light"
+
 
 def dashboard(request):
     if not request.user.is_authenticated:
         return render(request, "nutrition/landing.html")
+
+    lang = request.session.get("django_language", "ru")
+    theme = _get_theme(request)
+
+    def t(ru: str, en: str) -> str:
+        return en if lang == "en" else ru
+
+    def apply_plot_theme(fig: go.Figure):
+        if theme == "dark":
+            fig.update_layout(
+                template="plotly_dark",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#e5e7eb"),
+            )
+        else:
+            fig.update_layout(
+                template="plotly_white",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#0f172a"),
+            )
 
     today = timezone.localdate()
     goal = Goal.objects.filter(user=request.user, is_active=True).first()
@@ -65,10 +96,12 @@ def dashboard(request):
 
     # График калорий
     fig_cal = go.Figure()
-    fig_cal.add_trace(go.Scatter(x=df["day"], y=df["kcal_sum"], mode="lines+markers", name="Ккал/день"))
+    fig_cal.add_trace(go.Scatter(x=df["day"], y=df["kcal_sum"], mode="lines+markers", name=t("Ккал/день", "kcal/day")))
     if goal:
-        fig_cal.add_hline(y=goal.daily_kcal_target, line_dash="dot", annotation_text="Цель", opacity=0.7)
-    fig_cal.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), title="Калории за 14 дней")
+        fig_cal.add_hline(y=goal.daily_kcal_target, line_dash="dot", annotation_text=t("Цель", "Target"), opacity=0.7)
+    # Заголовок показываем в шаблоне карточки, поэтому у Plotly title отключаем
+    fig_cal.update_layout(height=320, margin=dict(l=10, r=10, t=20, b=10), title=None)
+    apply_plot_theme(fig_cal)
     calories_chart_html = fig_cal.to_html(full_html=False, include_plotlyjs="cdn")
 
     # Статистика за сегодня
@@ -77,6 +110,22 @@ def dashboard(request):
     today_protein = float(today_stats["protein_sum"].iloc[0]) if not today_stats.empty else 0.0
     today_fat = float(today_stats["fat_sum"].iloc[0]) if not today_stats.empty else 0.0
     today_carb = float(today_stats["carb_sum"].iloc[0]) if not today_stats.empty else 0.0
+
+    def pct(value: float, target) -> int | None:
+        try:
+            tval = float(target) if target is not None else 0.0
+            if tval <= 0:
+                return None
+            return int(max(0.0, min(100.0, (float(value) / tval) * 100.0)))
+        except Exception:
+            return None
+
+    progress = {
+        "kcal": pct(today_kcal, getattr(goal, "daily_kcal_target", None) if goal else None),
+        "protein": pct(today_protein, getattr(goal, "daily_protein_target", None) if goal else None),
+        "fat": pct(today_fat, getattr(goal, "daily_fat_target", None) if goal else None),
+        "carb": pct(today_carb, getattr(goal, "daily_carb_target", None) if goal else None),
+    }
 
     # График веса (последние 30 дней)
     weight_start = today - dt.timedelta(days=29)
@@ -88,10 +137,12 @@ def dashboard(request):
         weight_df = weight_df.sort_values("date")
 
         fig_weight = go.Figure()
-        fig_weight.add_trace(go.Scatter(x=weight_df["date"], y=weight_df["weight"], mode="lines+markers", name="Вес (кг)"))
+        fig_weight.add_trace(go.Scatter(x=weight_df["date"], y=weight_df["weight"], mode="lines+markers", name=t("Вес (кг)", "Weight (kg)")))
         if goal and goal.target_weight_kg:
-            fig_weight.add_hline(y=float(goal.target_weight_kg), line_dash="dot", annotation_text="Цель", opacity=0.7)
-        fig_weight.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), title="Динамика веса")
+            fig_weight.add_hline(y=float(goal.target_weight_kg), line_dash="dot", annotation_text=t("Цель", "Target"), opacity=0.7)
+        # Заголовок показываем в шаблоне карточки, поэтому у Plotly title отключаем
+        fig_weight.update_layout(height=320, margin=dict(l=10, r=10, t=20, b=10), title=None)
+        apply_plot_theme(fig_weight)
         weight_chart_html = fig_weight.to_html(full_html=False, include_plotlyjs="cdn")
 
     latest_weight = WeightLog.objects.filter(user=request.user).order_by("-date").first()
@@ -135,20 +186,22 @@ def dashboard(request):
         "today_protein": round(today_protein, 1),
         "today_fat": round(today_fat, 1),
         "today_carb": round(today_carb, 1),
+        "progress": progress,
     }
     return render(request, "nutrition/dashboard.html", context)
 
 
 @login_required
 def food_search(request):
-    form = FoodSearchForm(request.GET or None)
+    lang = request.session.get("django_language", "ru")
+    form = FoodSearchForm(request.GET or None, lang=lang)
     results = []
     if form.is_valid():
         client = OpenFoodFactsClient()
         try:
             results = client.search(form.cleaned_data["q"], limit=10)
         except Exception:
-            messages.error(request, "Не удалось получить данные из OpenFoodFacts. Попробуйте позже.")
+            messages.error(request, _t(request, "Не удалось получить данные из OpenFoodFacts. Попробуйте позже.", "Failed to fetch OpenFoodFacts. Please try again."))
 
     return render(
         request,
@@ -167,7 +220,7 @@ def food_import(request):
 
     code = (request.POST.get("code") or "").strip()
     if not code:
-        messages.error(request, "Не передан код продукта.")
+        messages.error(request, _t(request, "Не передан код продукта.", "Missing product code."))
         return redirect("nutrition:food_search")
 
     client = OpenFoodFactsClient()
@@ -177,7 +230,14 @@ def food_import(request):
         p = None
 
     if not p or p.kcal_100g is None:
-        messages.error(request, "Не удалось импортировать продукт: нет данных по калорийности (на 100г).")
+        messages.error(
+            request,
+            _t(
+                request,
+                "Не удалось импортировать продукт: нет данных по калорийности (на 100г).",
+                "Failed to import: missing calories (per 100g).",
+            ),
+        )
         return redirect("nutrition:food_search")
 
     obj, created = FoodItem.objects.update_or_create(
@@ -193,20 +253,27 @@ def food_import(request):
         },
     )
 
-    messages.success(request, f"Продукт {'добавлен' if created else 'обновлён'}: {obj.name}")
+    messages.success(
+        request,
+        _t(
+            request,
+            f"Продукт {'добавлен' if created else 'обновлён'}: {obj.name}",
+            f"Product {'added' if created else 'updated'}: {obj.name}",
+        ),
+    )
     return redirect("nutrition:food_search")
 
 
 @login_required
 def add_meal_item(request):
     if request.method == "POST":
-        form = AddMealItemForm(request.POST)
+        form = AddMealItemForm(request.POST, lang=request.session.get("django_language", "ru"))
         if form.is_valid():
             form.save(user=request.user)
-            messages.success(request, "Запись добавлена в дневник.")
+            messages.success(request, _t(request, "Запись добавлена в дневник.", "Entry added."))
             return redirect("nutrition:dashboard")
     else:
-        form = AddMealItemForm()
+        form = AddMealItemForm(lang=request.session.get("django_language", "ru"))
 
     return render(request, "nutrition/add_meal_item.html", {"form": form})
 
@@ -214,13 +281,13 @@ def add_meal_item(request):
 @login_required
 def add_weight(request):
     if request.method == "POST":
-        form = WeightLogForm(request.POST)
+        form = WeightLogForm(request.POST, lang=request.session.get("django_language", "ru"))
         if form.is_valid():
             form.save(user=request.user)
-            messages.success(request, "Вес сохранён.")
+            messages.success(request, _t(request, "Вес сохранён.", "Weight saved."))
             return redirect("nutrition:dashboard")
     else:
-        form = WeightLogForm(initial={"date": timezone.localdate()})
+        form = WeightLogForm(initial={"date": timezone.localdate()}, lang=request.session.get("django_language", "ru"))
 
     return render(request, "nutrition/add_weight.html", {"form": form})
 
@@ -232,7 +299,7 @@ def set_goal(request):
         form = GoalForm(request.POST, instance=goal)
         if form.is_valid():
             form.save(user=request.user)
-            messages.success(request, "Цель сохранена.")
+            messages.success(request, _t(request, "Цель сохранена.", "Goal saved."))
             return redirect("nutrition:dashboard")
     else:
         form = GoalForm(instance=goal, initial={"start_date": timezone.localdate()})
@@ -246,16 +313,23 @@ def register(request):
         return redirect("nutrition:dashboard")
 
     if request.method == "POST":
-        form = UserRegistrationForm(request.POST)
+        form = UserRegistrationForm(request.POST, lang=request.session.get("django_language", "ru"))
         if form.is_valid():
             user = form.save()
-            messages.success(request, f"Регистрация успешна! Добро пожаловать, {user.username}.")
+            messages.success(
+                request,
+                _t(
+                    request,
+                    f"Регистрация успешна! Добро пожаловать, {user.username}.",
+                    f"Registration successful! Welcome, {user.username}.",
+                ),
+            )
             from django.contrib.auth import login
 
             login(request, user)
             return redirect("nutrition:dashboard")
     else:
-        form = UserRegistrationForm()
+        form = UserRegistrationForm(lang=request.session.get("django_language", "ru"))
 
     return render(request, "registration/register.html", {"form": form})
 
@@ -264,15 +338,18 @@ def register(request):
 def add_food_manual(request):
     """Ручное добавление продукта в базу."""
     if request.method == "POST":
-        form = ManualFoodItemForm(request.POST)
+        form = ManualFoodItemForm(request.POST, lang=request.session.get("django_language", "ru"))
         if form.is_valid():
             food = form.save(commit=False)
             food.source = FoodItem.Source.MANUAL
             food.save()
-            messages.success(request, f"Продукт '{food.name}' добавлен в базу.")
+            messages.success(
+                request,
+                _t(request, f"Продукт '{food.name}' добавлен в базу.", f"Food '{food.name}' added."),
+            )
             return redirect("nutrition:food_search")
     else:
-        form = ManualFoodItemForm()
+        form = ManualFoodItemForm(lang=request.session.get("django_language", "ru"))
 
     return render(request, "nutrition/add_food_manual.html", {"form": form})
 
@@ -293,5 +370,20 @@ def logout_view(request):
     Django LogoutView по умолчанию требует POST — это ок, но в учебном проекте
     удобнее поддержать и GET (чтобы не ловить «Страница недоступна»).
     """
+    theme = _get_theme(request)
     auth_logout(request)
-    return redirect("/")
+    resp = redirect("/")
+    # Preserve theme across logout
+    resp.set_cookie("theme", theme, max_age=60 * 60 * 24 * 365, samesite="Lax")
+    return resp
+
+
+@require_http_methods(["POST"])
+def toggle_theme(request):
+    """Переключение темы (светлая/темная)."""
+    current_theme = _get_theme(request)
+    new_theme = "dark" if current_theme == "light" else "light"
+    request.session["theme"] = new_theme
+    resp = redirect(request.POST.get("next", "/"))
+    resp.set_cookie("theme", new_theme, max_age=60 * 60 * 24 * 365, samesite="Lax")
+    return resp

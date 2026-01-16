@@ -29,7 +29,24 @@ class OpenFoodFactsClient:
         if not query:
             return []
 
-        # Пробуем поиск на русском языке (российская база)
+        # Django cache (optional)
+        try:
+            from django.core.cache import cache  # type: ignore
+        except Exception:  # pragma: no cover
+            cache = None
+
+        cache_key = f"off:search:v2:{query.lower()}:{min(max(limit, 1), 30)}"
+        if cache is not None:
+            cached = cache.get(cache_key)
+            if cached is not None:
+                return cached
+
+        headers = {"User-Agent": "FitMacroPlanner/1.0 (student project)"}
+
+        # Ограничиваем поля ответа, чтобы ускорить загрузку
+        fields = "code,product_name,generic_name,brands,nutriments"
+
+        # Пробуем поиск с приоритетом российских продуктов
         params = {
             "search_terms": query,
             "search_simple": 1,
@@ -37,15 +54,21 @@ class OpenFoodFactsClient:
             "json": 1,
             "page_size": min(max(limit, 1), 30),
             "countries_tags_en": "russia",  # Приоритет российским продуктам
+            "fields": fields,
         }
+        url = f"{self.base_url}/cgi/search.pl"
+
         try:
-            r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
+            r = requests.get(url, params=params, timeout=8, headers=headers)
             r.raise_for_status()
             data = r.json()
         except Exception:
-            # Если не получилось, пробуем без фильтра по стране
+            data = {"products": []}
+
+        # Если результатов мало/нет — расширяем поиск без фильтра по стране
+        if not (data.get("products") or []):
             params.pop("countries_tags_en", None)
-            r = requests.get(f"{self.base_url}/cgi/search.pl", params=params, timeout=15)
+            r = requests.get(url, params=params, timeout=8, headers=headers)
             r.raise_for_status()
             data = r.json()
 
@@ -68,6 +91,8 @@ class OpenFoodFactsClient:
                 )
             )
 
+        if cache is not None:
+            cache.set(cache_key, products, timeout=60 * 60 * 6)  # 6h
         return products
 
     def get_product(self, code: str) -> OffProduct | None:
@@ -75,7 +100,8 @@ class OpenFoodFactsClient:
         if not code:
             return None
 
-        r = requests.get(f"{self.base_url}/api/v2/product/{code}.json", timeout=15)
+        headers = {"User-Agent": "FitMacroPlanner/1.0 (student project)"}
+        r = requests.get(f"{self.base_url}/api/v2/product/{code}.json", timeout=8, headers=headers)
         r.raise_for_status()
         data = r.json()
         if data.get("status") != 1:

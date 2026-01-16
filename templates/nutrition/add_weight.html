@@ -1,35 +1,38 @@
 {% extends "base.html" %}
+{% load tr %}
 
-{% block title %}Добавить вес — FitMacro Planner{% endblock %}
+{% block title %}{% tr ru="Добавить вес" en="Add weight" %} — FitMacro Planner{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Добавить вес</h1>
-    <a class="btn btn-outline-secondary" href="{% url 'nutrition:dashboard' %}">Назад</a>
+  <div class="flex items-end justify-between mb-4">
+    <h1 class="text-3xl font-semibold">{% tr ru="Добавить вес" en="Add weight" %}</h1>
+    <a class="btn btn-ghost btn-sm" href="{% url 'nutrition:dashboard' %}">{% tr ru="Назад" en="Back" %}</a>
   </div>
 
-  <div class="bg-white border rounded-3 p-3">
-    <form method="post" class="row g-3">
-      {% csrf_token %}
-      <div class="col-12 col-md-6">
-        {{ form.date.label_tag }}
-        {{ form.date }}
-      </div>
-      <div class="col-12 col-md-6">
-        {{ form.weight_kg.label_tag }}
-        {{ form.weight_kg }}
-      </div>
-
-      {% if form.errors %}
-        <div class="col-12">
-          <div class="alert alert-danger mb-0">Проверьте поля формы.</div>
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body">
+      <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% csrf_token %}
+        <div>
+          {{ form.date.label_tag }}
+          {{ form.date }}
         </div>
-      {% endif %}
+        <div>
+          {{ form.weight_kg.label_tag }}
+          {{ form.weight_kg }}
+        </div>
 
-      <div class="col-12">
-        <button class="btn btn-primary" type="submit">Сохранить</button>
-      </div>
-    </form>
+        {% if form.errors %}
+          <div class="md:col-span-2">
+            <div class="alert alert-error"><span>{% tr ru="Проверьте поля формы." en="Please check the form fields." %}</span></div>
+          </div>
+        {% endif %}
+
+        <div class="md:col-span-2">
+          <button class="btn btn-primary" type="submit">{% tr ru="Сохранить" en="Save" %}</button>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}
 

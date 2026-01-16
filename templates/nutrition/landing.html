@@ -1,37 +1,41 @@
 {% extends "base.html" %}
+{% load tr %}
 
 {% block title %}FitMacro Planner{% endblock %}
 
 {% block content %}
-  <div class="bg-white border rounded-3 p-4 p-lg-5">
-    <h1 class="display-6 fw-semibold">FitMacro Planner</h1>
-    <p class="text-secondary fs-5 mb-4">
-      Дневник питания с подсчётом КБЖУ, целями и графиками прогресса. Импорт продуктов из OpenFoodFacts.
-    </p>
+  <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body">
+      <h1 class="text-4xl font-bold">FitMacro Planner</h1>
+      <p class="text-lg opacity-70 mt-2">
+        {% tr ru="Дневник питания с подсчётом КБЖУ, целями и графиками прогресса. Импорт продуктов из OpenFoodFacts." en="Nutrition diary with macro tracking, goals and progress charts. Import foods from OpenFoodFacts." %}
+      </p>
 
-    <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-primary btn-lg" href="{% url 'login' %}">Войти</a>
-      <a class="btn btn-outline-secondary btn-lg" href="/admin/">Админка</a>
-    </div>
+      <div class="flex flex-wrap gap-2 mt-4">
+        <a class="btn btn-primary" href="{% url 'login' %}">{% tr ru="Войти" en="Sign in" %}</a>
+        <a class="btn btn-outline" href="/admin/">{% tr ru="Админка" en="Admin" %}</a>
+      </div>
 
-    <hr class="my-4" />
-    <div class="row g-3">
-      <div class="col-12 col-md-4">
-        <div class="p-3 bg-body-tertiary rounded-3 h-100">
-          <div class="fw-semibold">КБЖУ</div>
-          <div class="text-secondary small">Автоматический расчёт по граммовке и нутриентам.</div>
+      <div class="divider my-6"></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <div class="font-semibold">{% tr ru="КБЖУ" en="Macros" %}</div>
+            <div class="text-sm opacity-70">{% tr ru="Автоматический расчёт по граммовке и нутриентам." en="Automatic calculation based on grams and nutrients." %}</div>
+          </div>
         </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div class="p-3 bg-body-tertiary rounded-3 h-100">
-          <div class="fw-semibold">Цели</div>
-          <div class="text-secondary small">Суточная цель по калориям и (опционально) макросам.</div>
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <div class="font-semibold">{% tr ru="Цели" en="Goals" %}</div>
+            <div class="text-sm opacity-70">{% tr ru="Суточная цель по калориям и (опционально) макросам." en="Daily calorie target and optional macros." %}</div>
+          </div>
         </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div class="p-3 bg-body-tertiary rounded-3 h-100">
-          <div class="fw-semibold">Аналитика</div>
-          <div class="text-secondary small">Графики и сводки по дням/неделям.</div>
+        <div class="card bg-base-200">
+          <div class="card-body">
+            <div class="font-semibold">{% tr ru="Аналитика" en="Analytics" %}</div>
+            <div class="text-sm opacity-70">{% tr ru="Графики и сводки по дням/неделям." en="Charts and summaries by day/week." %}</div>
+          </div>
         </div>
       </div>
     </div>

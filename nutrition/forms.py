@@ -10,12 +10,23 @@ from .models import FoodItem, Goal, Meal, MealItem, WeightLog
 
 User = get_user_model()
 
+EN_MEAL_TYPE_LABELS = {
+    Meal.Type.BREAKFAST: "Breakfast",
+    Meal.Type.LUNCH: "Lunch",
+    Meal.Type.DINNER: "Dinner",
+    Meal.Type.SNACK: "Snack",
+}
+
+
+def _t(lang: str | None, ru: str, en: str) -> str:
+    return en if lang == "en" else ru
+
 
 class CustomDateInput(forms.DateInput):
     """Кастомный виджет для выбора даты с flatpickr."""
 
     def __init__(self, attrs=None):
-        default_attrs = {"class": "form-control custom-date", "placeholder": "дд.мм.гггг"}
+        default_attrs = {"class": "input custom-date", "placeholder": "дд.мм.гггг"}
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs, format="%Y-%m-%d")
@@ -25,7 +36,7 @@ class CustomSelect(forms.Select):
     """Кастомный виджет для выбора с Choices.js стилями."""
 
     def __init__(self, attrs=None):
-        default_attrs = {"class": "form-select custom-select"}
+        default_attrs = {"class": "select custom-select"}
         if attrs:
             default_attrs.update(attrs)
         super().__init__(attrs=default_attrs)
@@ -37,29 +48,39 @@ class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(
         label="Email",
         required=True,
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        widget=forms.EmailInput(attrs={"class": "input"}),
     )
 
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
         widgets = {
-            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "username": forms.TextInput(attrs={"class": "input"}),
         }
 
     def __init__(self, *args, **kwargs):
+        lang = kwargs.pop("lang", None)
         super().__init__(*args, **kwargs)
-        self.fields["password1"].widget.attrs.update({"class": "form-control"})
-        self.fields["password2"].widget.attrs.update({"class": "form-control"})
+        self.fields["password1"].widget.attrs.update({"class": "input"})
+        self.fields["password2"].widget.attrs.update({"class": "input"})
+
+        # Optional localization for labels (templates also override some labels)
+        self.fields["username"].label = _t(lang, "Логин", "Username")
+        self.fields["email"].label = "Email"
+        self.fields["password1"].label = _t(lang, "Пароль", "Password")
+        self.fields["password2"].label = _t(lang, "Повторите пароль", "Confirm password")
 
 
 class FoodSearchForm(forms.Form):
-    q = forms.CharField(
-        label="Поиск продукта",
-        max_length=120,
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Например: йогурт, хлеб, курица"}),
-    )
+    q = forms.CharField(max_length=120, required=True, widget=forms.TextInput(attrs={"class": "input"}))
+
+    def __init__(self, *args, **kwargs):
+        lang = kwargs.pop("lang", None)
+        super().__init__(*args, **kwargs)
+        self.fields["q"].label = _t(lang, "Поиск продукта", "Search food")
+        self.fields["q"].widget.attrs.update(
+            {"placeholder": _t(lang, "Например: йогурт, хлеб, курица", "E.g. yogurt, bread, chicken")}
+        )
 
 
 class ManualFoodItemForm(forms.ModelForm):
@@ -69,12 +90,12 @@ class ManualFoodItemForm(forms.ModelForm):
         model = FoodItem
         fields = ["name", "brand", "kcal_per_100g", "protein_per_100g", "fat_per_100g", "carb_per_100g"]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Название продукта"}),
-            "brand": forms.TextInput(attrs={"class": "form-control", "placeholder": "Бренд (необязательно)"}),
-            "kcal_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "protein_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "fat_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
-            "carb_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "min": "0"}),
+            "name": forms.TextInput(attrs={"class": "input", "placeholder": "Название продукта"}),
+            "brand": forms.TextInput(attrs={"class": "input", "placeholder": "Бренд (необязательно)"}),
+            "kcal_per_100g": forms.NumberInput(attrs={"class": "input", "step": "0.01", "min": "0"}),
+            "protein_per_100g": forms.NumberInput(attrs={"class": "input", "step": "0.01", "min": "0"}),
+            "fat_per_100g": forms.NumberInput(attrs={"class": "input", "step": "0.01", "min": "0"}),
+            "carb_per_100g": forms.NumberInput(attrs={"class": "input", "step": "0.01", "min": "0"}),
         }
         labels = {
             "name": "Название",
@@ -84,6 +105,19 @@ class ManualFoodItemForm(forms.ModelForm):
             "fat_per_100g": "Жиры (на 100г, г)",
             "carb_per_100g": "Углеводы (на 100г, г)",
         }
+
+    def __init__(self, *args, **kwargs):
+        lang = kwargs.pop("lang", None)
+        super().__init__(*args, **kwargs)
+        self.fields["name"].label = _t(lang, "Название", "Name")
+        self.fields["brand"].label = _t(lang, "Бренд", "Brand")
+        self.fields["kcal_per_100g"].label = _t(lang, "Калории (на 100г)", "Calories (per 100g)")
+        self.fields["protein_per_100g"].label = _t(lang, "Белки (на 100г, г)", "Protein (per 100g, g)")
+        self.fields["fat_per_100g"].label = _t(lang, "Жиры (на 100г, г)", "Fat (per 100g, g)")
+        self.fields["carb_per_100g"].label = _t(lang, "Углеводы (на 100г, г)", "Carbs (per 100g, g)")
+        # Placeholders
+        self.fields["name"].widget.attrs.update({"placeholder": _t(lang, "Название продукта", "Food name")})
+        self.fields["brand"].widget.attrs.update({"placeholder": _t(lang, "Бренд (необязательно)", "Brand (optional)")})
 
 
 class AddMealItemForm(forms.Form):
@@ -107,8 +141,18 @@ class AddMealItemForm(forms.Form):
         min_value=1,
         decimal_places=2,
         max_digits=7,
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+        widget=forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
     )
+
+    def __init__(self, *args, **kwargs):
+        lang = kwargs.pop("lang", None)
+        super().__init__(*args, **kwargs)
+        self.fields["date"].label = _t(lang, "Дата", "Date")
+        self.fields["type"].label = _t(lang, "Приём пищи", "Meal")
+        self.fields["food_item"].label = _t(lang, "Продукт", "Food")
+        self.fields["grams"].label = _t(lang, "Граммы", "Grams")
+        if lang == "en":
+            self.fields["type"].choices = [(v, EN_MEAL_TYPE_LABELS.get(v, label)) for v, label in Meal.Type.choices]
 
     def save(self, *, user) -> MealItem:
         meal, _ = Meal.objects.get_or_create(user=user, date=self.cleaned_data["date"], type=self.cleaned_data["type"])
@@ -125,8 +169,14 @@ class WeightLogForm(forms.ModelForm):
         fields = ["date", "weight_kg"]
         widgets = {
             "date": CustomDateInput(),
-            "weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "weight_kg": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        lang = kwargs.pop("lang", None)
+        super().__init__(*args, **kwargs)
+        self.fields["date"].label = _t(lang, "Дата", "Date")
+        self.fields["weight_kg"].label = _t(lang, "Вес (кг)", "Weight (kg)")
 
     def save(self, commit=True, *, user):
         obj = super().save(commit=False)
@@ -152,12 +202,12 @@ class GoalForm(forms.ModelForm):
         widgets = {
             "start_date": CustomDateInput(),
             "target_date": CustomDateInput(),
-            "start_weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-            "target_weight_kg": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-            "daily_kcal_target": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
-            "daily_protein_target": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
-            "daily_fat_target": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
-            "daily_carb_target": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
+            "start_weight_kg": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "target_weight_kg": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "daily_kcal_target": forms.NumberInput(attrs={"class": "input", "min": 1}),
+            "daily_protein_target": forms.NumberInput(attrs={"class": "input", "min": 0}),
+            "daily_fat_target": forms.NumberInput(attrs={"class": "input", "min": 0}),
+            "daily_carb_target": forms.NumberInput(attrs={"class": "input", "min": 0}),
         }
 
     def save(self, commit=True, *, user):

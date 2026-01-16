@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from nutrition.views import logout_view, set_language
+from nutrition.views import logout_view, set_language, toggle_theme
 
 # Локализация админки
 admin.site.site_header = "FitMacro Planner — Администрирование"
@@ -29,7 +29,8 @@ admin.site.index_title = "Панель управления"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/setlang/', set_language, name='set_language'),
-    path("accounts/logout/", logout_view, name="logout_override"),
+    path('theme/toggle/', toggle_theme, name='toggle_theme'),
+    path("accounts/logout/", logout_view, name="logout"),  # Переопределяем стандартный logout
     path('', include('nutrition.urls')),
     path("accounts/", include("django.contrib.auth.urls")),
 ]
