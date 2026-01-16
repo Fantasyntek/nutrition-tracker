@@ -1,0 +1,227 @@
+/* shadcn/ui-like design tokens + minimal component classes for Django templates */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.6rem;
+  --progress-fill: 221.2 83.2% 53.3%; /* blue-600 */
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  --progress-fill: 221.2 83.2% 60%; /* slightly brighter in dark */
+}
+
+/* base */
+html, body { height: 100%; }
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* components (compatible names with previous daisyUI usage) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border-radius: calc(var(--radius) - 0.2rem);
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+.btn:hover { background: hsl(var(--accent)); }
+.btn:disabled, .btn[disabled] { opacity: 0.5; pointer-events: none; }
+.btn-sm { height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; }
+.btn-circle { width: 2.25rem; padding: 0; border-radius: 9999px; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: hsl(var(--accent)); }
+.btn-outline { border-color: hsl(var(--border)); background: transparent; }
+.btn-outline:hover { background: hsl(var(--accent)); }
+.btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.btn-primary:hover { background: hsl(var(--primary) / 0.9); }
+
+.card {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.card-body { padding: 1rem; }
+
+.alert { border: 1px solid hsl(var(--border)); background: hsl(var(--card)); border-radius: var(--radius); padding: 0.75rem 1rem; }
+.alert-success { border-color: hsl(142.1 76.2% 36.3% / 0.35); }
+.alert-danger, .alert-error { border-color: hsl(var(--destructive) / 0.35); }
+.alert-warning { border-color: hsl(47.9 95.8% 53.1% / 0.35); }
+.alert-info { border-color: hsl(199 89% 48% / 0.35); }
+.shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+.input, .select {
+  width: 100%;
+  height: 2.5rem;
+  border-radius: calc(var(--radius) - 0.2rem);
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  padding: 0 0.75rem;
+}
+.input:focus, .select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.15);
+  border-color: hsl(var(--ring) / 0.35);
+}
+
+/* Choices.js (selects in forms) - respect shadcn tokens incl. dark */
+.choices__inner {
+  border-radius: calc(var(--radius) - 0.2rem) !important;
+  border: 1px solid hsl(var(--input)) !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  min-height: 2.5rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+.choices__list--single { color: hsl(var(--foreground)) !important; }
+.choices__list--dropdown {
+  border-radius: var(--radius) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
+  overflow: hidden;
+}
+.choices__list--dropdown .choices__item--selectable { color: hsl(var(--popover-foreground)) !important; }
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+.choices__placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 1 !important; }
+.choices[data-type*="select-one"]::after { border-color: hsl(var(--muted-foreground)) transparent transparent transparent !important; }
+
+/* Flatpickr - respect tokens */
+.flatpickr-calendar {
+  background: hsl(var(--popover)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
+}
+.flatpickr-day { color: hsl(var(--popover-foreground)) !important; border-radius: calc(var(--radius) - 0.3rem) !important; }
+.flatpickr-day:hover { background: hsl(var(--accent)) !important; }
+.flatpickr-day.selected { background: hsl(var(--primary)) !important; color: hsl(var(--primary-foreground)) !important; }
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays,
+.flatpickr-time { background: hsl(var(--popover)) !important; }
+
+.text-muted { color: hsl(var(--muted-foreground)); }
+.divider { height: 1px; background: hsl(var(--border)); margin: 0.75rem 0; }
+.border-base-300 { border-color: hsl(var(--border)); } /* compat */
+.bg-base-100 { background: hsl(var(--card)); }        /* compat */
+.bg-base-200 { background: hsl(var(--background)); }  /* compat */
+.text-error { color: hsl(var(--destructive)); }
+
+/* Progress (pill) */
+.progress {
+  width: 100%;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+  overflow: hidden;
+}
+.progress > .progress__bar {
+  height: 100%;
+  width: 0%;
+  background: hsl(var(--progress-fill));
+  border-radius: 9999px;
+  transition: width 220ms ease;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.table thead th {
+  text-align: left;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.6rem 0.75rem;
+}
+.table tbody td {
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.65rem 0.75rem;
+  vertical-align: top;
+}
+.table-zebra tbody tr:nth-child(2n) td {
+  background: hsl(var(--secondary) / 0.6);
+}
+
+/* dropdown (simple) */
+details.dropdown summary::-webkit-details-marker { display: none; }
+details.dropdown > summary { list-style: none; cursor: pointer; }
+details.dropdown[open] .dropdown-content { display: block; }
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  margin-top: 0.5rem;
+  min-width: 10rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  padding: 0.25rem;
+  z-index: 50;
+}
+.menu a, .menu button {
+  width: 100%;
+  text-align: left;
+  border-radius: calc(var(--radius) - 0.3rem);
+  padding: 0.5rem 0.6rem;
+}
+.menu a:hover, .menu button:hover { background: hsl(var(--accent)); }
+
