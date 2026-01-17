@@ -102,3 +102,44 @@ class OpenFoodFactsClientTests(TestCase):
             called_params = mget.call_args_list[0].kwargs.get("params") or {}
             self.assertIn("fields", called_params)
             self.assertIn("nutriments", called_params["fields"])
+
+    def test_search_uses_cache(self):
+        client = OpenFoodFactsClient()
+
+        resp = Mock()
+        resp.raise_for_status = Mock()
+        resp.json = Mock(return_value={"products": [{"code": "2", "product_name": "Y", "brands": "", "nutriments": {}}]})
+
+        with patch("nutrition.services.openfoodfacts.requests.get", return_value=resp) as mget:
+            r1 = client.search("cached", limit=1)
+            r2 = client.search("cached", limit=1)
+            self.assertEqual(len(r1), 1)
+            self.assertEqual(len(r2), 1)
+            self.assertEqual(mget.call_count, 1)
+
+
+class LanguageSwitchTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_set_language_sets_session(self):
+        r = self.client.post(reverse("set_language"), {"language": "en", "next": "/"})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(self.client.session.get("django_language"), "en")
+
+
+class FoodImportValidationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="u4", password="pass12345")
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_food_import_requires_code_english_message(self):
+        session = self.client.session
+        session["django_language"] = "en"
+        session.save()
+
+        r = self.client.post(reverse("nutrition:food_import"), {"code": ""}, follow=True)
+        self.assertEqual(r.status_code, 200)
+        body = r.content.decode("utf-8")
+        self.assertIn("Missing product code.", body)
