@@ -58,16 +58,6 @@ class OpenFoodFactsClient:
         # Ограничиваем поля ответа, чтобы ускорить загрузку
         fields = "code,product_name,generic_name,brands,nutriments"
 
-        # Пробуем поиск с приоритетом российских продуктов
-        params = {
-            "search_terms": query,
-            "search_simple": 1,
-            "action": "process",
-            "json": 1,
-            "page_size": min(max(limit, 1), 30),
-            "countries_tags_en": "russia",  # Приоритет российским продуктам
-            "fields": fields,
-        }
         url = f"{self.base_url}/cgi/search.pl"
 
         def _fetch(p: dict) -> dict:
@@ -92,13 +82,23 @@ class OpenFoodFactsClient:
                 # Любая другая ошибка - возвращаем пустой результат, не падаем
                 return {"products": []}
 
-        # Пробуем поиск с приоритетом российских продуктов
-        data = _fetch(params)
+        # Базовые параметры поиска
+        base_params = {
+            "search_terms": query,
+            "search_simple": 1,
+            "action": "process",
+            "json": 1,
+            "page_size": min(max(limit, 1), 30),
+            "fields": fields,
+        }
         
-        # Если результатов мало/нет — расширяем поиск без фильтра по стране
+        # Пробуем поиск с приоритетом российских продуктов
+        params_with_country = {**base_params, "countries_tags_en": "russia"}
+        data = _fetch(params_with_country)
+        
+        # Если результатов нет — расширяем поиск без фильтра по стране
         if not (data.get("products") or []):
-            params.pop("countries_tags_en", None)
-            data = _fetch(params)
+            data = _fetch(base_params)
 
         products = []
         for p in data.get("products", []) or []:
