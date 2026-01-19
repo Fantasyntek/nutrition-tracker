@@ -6,9 +6,9 @@ from .models import FoodItem, Goal, Meal, MealItem, WeightLog
 
 @admin.register(FoodItem)
 class FoodItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "brand", "kcal_per_100g", "source", "created_at")
-    list_filter = ("source",)
-    search_fields = ("name", "brand", "external_id")
+    list_display = ("id", "name", "brand", "kcal_per_100g", "source", "user", "created_at")
+    list_filter = ("source", "user")
+    search_fields = ("name", "brand", "external_id", "user__username")
     
     class Media:
         js = ('admin/js/change_form.js',)

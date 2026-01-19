@@ -274,13 +274,13 @@ def food_import(request):
 @login_required
 def add_meal_item(request):
     if request.method == "POST":
-        form = AddMealItemForm(request.POST, lang=request.session.get("django_language", "ru"))
+        form = AddMealItemForm(request.POST, lang=request.session.get("django_language", "ru"), user=request.user)
         if form.is_valid():
             form.save(user=request.user)
             messages.success(request, _t(request, "Запись добавлена в дневник.", "Entry added."))
             return redirect("nutrition:dashboard")
     else:
-        form = AddMealItemForm(lang=request.session.get("django_language", "ru"))
+        form = AddMealItemForm(lang=request.session.get("django_language", "ru"), user=request.user)
 
     return render(request, "nutrition/add_meal_item.html", {"form": form})
 
@@ -349,6 +349,7 @@ def add_food_manual(request):
         if form.is_valid():
             food = form.save(commit=False)
             food.source = FoodItem.Source.MANUAL
+            food.user = request.user  # Привязываем продукт к текущему пользователю
             food.save()
             messages.success(
                 request,

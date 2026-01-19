@@ -7,6 +7,13 @@ class FoodItem(models.Model):
         MANUAL = "manual", "Вручную"
         OPENFOODFACTS = "openfoodfacts", "OpenFoodFacts"
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Владелец продукта (null для продуктов из OpenFoodFacts - они глобальные)",
+    )
     name = models.CharField(max_length=200)
     brand = models.CharField(max_length=200, blank=True)
 

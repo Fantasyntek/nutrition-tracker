@@ -134,7 +134,7 @@ class AddMealItemForm(forms.Form):
     )
     food_item = forms.ModelChoiceField(
         label="Продукт",
-        queryset=FoodItem.objects.all(),
+        queryset=FoodItem.objects.none(),  # Будет установлен в __init__
         widget=CustomSelect(),
     )
     grams = forms.DecimalField(
@@ -147,6 +147,7 @@ class AddMealItemForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         lang = kwargs.pop("lang", None)
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields["date"].label = _t(lang, "Дата", "Date")
         self.fields["type"].label = _t(lang, "Приём пищи", "Meal")
@@ -154,6 +155,10 @@ class AddMealItemForm(forms.Form):
         self.fields["grams"].label = _t(lang, "Граммы", "Grams")
         if lang == "en":
             self.fields["type"].choices = [(v, EN_MEAL_TYPE_LABELS.get(v, label)) for v, label in Meal.Type.choices]
+        # Фильтруем продукты: показываем глобальные (OpenFoodFacts) и продукты текущего пользователя
+        if user:
+            from django.db.models import Q
+            self.fields["food_item"].queryset = FoodItem.objects.filter(Q(user=user) | Q(user__isnull=True))
 
     def save(self, *, user) -> MealItem:
         meal, _ = Meal.objects.get_or_create(user=user, date=self.cleaned_data["date"], type=self.cleaned_data["type"])
