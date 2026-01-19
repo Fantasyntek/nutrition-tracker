@@ -71,27 +71,34 @@ class OpenFoodFactsClient:
         url = f"{self.base_url}/cgi/search.pl"
 
         def _fetch(p: dict) -> dict:
-            r = requests.get(url, params=p, timeout=8, headers=headers)
-            r.raise_for_status()
-            return r.json()
+            try:
+                r = requests.get(url, params=p, timeout=10, headers=headers)
+                r.raise_for_status()
+                data = r.json()
+                # Проверяем, что ответ валидный JSON и содержит поле products
+                if not isinstance(data, dict):
+                    return {"products": []}
+                return data
+            except requests.exceptions.Timeout:
+                # Таймаут - возвращаем пустой результат, не падаем
+                return {"products": []}
+            except requests.exceptions.RequestException:
+                # Ошибка сети/HTTP - возвращаем пустой результат, не падаем
+                return {"products": []}
+            except (ValueError, KeyError, TypeError):
+                # Ошибка парсинга JSON - возвращаем пустой результат, не падаем
+                return {"products": []}
+            except Exception:
+                # Любая другая ошибка - возвращаем пустой результат, не падаем
+                return {"products": []}
 
-        last_exc: Exception | None = None
-        try:
-            data = _fetch(params)
-        except Exception as e:
-            last_exc = e
-            data = {"products": []}
-
+        # Пробуем поиск с приоритетом российских продуктов
+        data = _fetch(params)
+        
         # Если результатов мало/нет — расширяем поиск без фильтра по стране
         if not (data.get("products") or []):
             params.pop("countries_tags_en", None)
-            try:
-                data = _fetch(params)
-            except Exception as e:
-                # Если обе попытки упали — пусть view покажет сообщение об ошибке.
-                if last_exc is not None:
-                    raise e
-                data = {"products": []}
+            data = _fetch(params)
 
         products = []
         for p in data.get("products", []) or []:

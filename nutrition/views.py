@@ -200,7 +200,10 @@ def food_search(request):
         client = OpenFoodFactsClient()
         try:
             results = client.search(form.cleaned_data["q"], limit=10)
+            # Если запрос был выполнен, но результатов нет - это нормально (не ошибка)
+            # Сообщение об ошибке показывается только при реальных исключениях
         except Exception:
+            # Только реальные исключения (например, проблемы с кэшем Django)
             messages.error(request, _t(request, "Не удалось получить данные из OpenFoodFacts. Попробуйте позже.", "Failed to fetch OpenFoodFacts. Please try again."))
 
     return render(
