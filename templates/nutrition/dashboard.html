@@ -29,7 +29,9 @@
               <div class="mt-2 text-sm opacity-70">{% tr ru="Цель по весу" en="Target weight" %}: {{ goal.target_weight_kg }} {% tr ru="кг" en="kg" %}</div>
             {% endif %}
           {% else %}
-            <div class="opacity-70">{% tr ru="Пока не задана. Нажми «Цель»." en="Not set yet. Click “Goal”." %}</div>
+            <div class="opacity-70">
+              {% tr ru='Пока не задана. Нажми' en='Not set yet. Click' %} <a href="{% url 'nutrition:set_goal' %}" class="link link-primary">{% tr ru="«Цель»" en='"Goal"' %}</a>.
+            </div>
           {% endif %}
         </div>
 
@@ -73,7 +75,9 @@
             <div class="text-2xl font-bold">{{ latest_weight.weight_kg }} {% tr ru="кг" en="kg" %}</div>
             <div class="text-sm opacity-70">{{ latest_weight.date|date:"Y-m-d" }}</div>
           {% else %}
-            <div class="opacity-70">{% tr ru="Нет данных. Нажми «Добавить вес»." en="No data. Click “Add weight”." %}</div>
+            <div class="opacity-70">
+              {% tr ru='Нет данных. Нажми' en='No data. Click' %} <a href="{% url 'nutrition:add_weight' %}" class="link link-primary">{% tr ru="«Добавить вес»" en='"Add weight"' %}</a>.
+            </div>
           {% endif %}
         </div>
 
@@ -84,9 +88,11 @@
             <div class="text-xl font-bold">{{ weight_forecast.predicted_weight }} {% tr ru="кг" en="kg" %}</div>
             <div class="text-sm opacity-70">
               {% if weight_forecast.weight_change > 0 %}
-                +{{ weight_forecast.weight_change }} {% tr ru="кг" en="kg" %}
+                +{{ weight_forecast.weight_change|floatformat:2 }} {% tr ru="кг" en="kg" %}
+              {% elif weight_forecast.weight_change < 0 %}
+                {{ weight_forecast.weight_change|floatformat:2 }} {% tr ru="кг" en="kg" %}
               {% else %}
-                {{ weight_forecast.weight_change }} {% tr ru="кг" en="kg" %}
+                0 {% tr ru="кг" en="kg" %}
               {% endif %}
               {% if weight_forecast.is_deficit %}
                 ({% tr ru="дефицит" en="deficit" %}: {{ weight_forecast.kcal_abs }} {% tr ru="ккал" en="kcal" %})

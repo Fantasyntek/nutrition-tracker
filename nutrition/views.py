@@ -167,8 +167,10 @@ def dashboard(request):
         expected_kcal = float(goal.daily_kcal_target) * days_count
         deficit_kcal = expected_kcal - total_kcal
         # 7700 ккал ≈ 1 кг
-        weight_change_kg = deficit_kcal / 7700.0
-        predicted_weight = float(goal.start_weight_kg) - weight_change_kg
+        # Если дефицит (deficit_kcal > 0) → вес уменьшается → weight_change отрицательный
+        # Если профицит (deficit_kcal < 0) → вес увеличивается → weight_change положительный
+        weight_change_kg = -deficit_kcal / 7700.0  # Инвертируем знак для правильной интерпретации
+        predicted_weight = float(goal.start_weight_kg) + weight_change_kg
         weight_forecast = {
             "predicted_weight": round(predicted_weight, 2),
             "weight_change": round(weight_change_kg, 2),

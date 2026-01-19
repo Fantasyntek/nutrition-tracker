@@ -146,12 +146,88 @@ body {
   border-radius: var(--radius) !important;
   box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
 }
-.flatpickr-day { color: hsl(var(--popover-foreground)) !important; border-radius: calc(var(--radius) - 0.3rem) !important; }
-.flatpickr-day:hover { background: hsl(var(--accent)) !important; }
-.flatpickr-day.selected { background: hsl(var(--primary)) !important; color: hsl(var(--primary-foreground)) !important; }
+.flatpickr-day { 
+  color: hsl(var(--popover-foreground)) !important; 
+  border-radius: calc(var(--radius) - 0.3rem) !important; 
+  border-color: transparent !important;
+}
+.flatpickr-day:hover { 
+  background: hsl(var(--accent)) !important; 
+  color: hsl(var(--accent-foreground)) !important;
+  border-color: hsl(var(--accent)) !important;
+}
+.flatpickr-day.selected { 
+  background: hsl(var(--primary)) !important; 
+  color: hsl(var(--primary-foreground)) !important; 
+  border-color: hsl(var(--primary)) !important;
+}
+.flatpickr-day.today { 
+  border-color: hsl(var(--primary)) !important; 
+  font-weight: 600;
+}
+.flatpickr-day.today.selected { 
+  border-color: hsl(var(--primary-foreground)) !important;
+}
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay { 
+  color: hsl(var(--muted-foreground)) !important; 
+  opacity: 0.5;
+}
+.flatpickr-day.disabled { 
+  color: hsl(var(--muted-foreground)) !important; 
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.flatpickr-day.disabled:hover { 
+  background: transparent !important;
+}
 .flatpickr-months .flatpickr-month,
 .flatpickr-weekdays,
-.flatpickr-time { background: hsl(var(--popover)) !important; }
+.flatpickr-time { 
+  background: hsl(var(--popover)) !important; 
+  color: hsl(var(--popover-foreground)) !important;
+}
+.flatpickr-weekday {
+  color: hsl(var(--popover-foreground)) !important;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.flatpickr-currentMonth {
+  color: hsl(var(--popover-foreground)) !important;
+  font-weight: 600;
+}
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  fill: hsl(var(--popover-foreground)) !important;
+  opacity: 0.8;
+}
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+  fill: hsl(var(--primary)) !important;
+  opacity: 1;
+}
+.flatpickr-monthDropdown-months,
+.flatpickr-yearDropdown {
+  background: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+.flatpickr-monthDropdown-months .flatpickr-monthDropdown-month:hover,
+.flatpickr-yearDropdown .flatpickr-yearDropdown-year:hover {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+.flatpickr-time input {
+  background: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+.flatpickr-time input:hover {
+  background: hsl(var(--accent)) !important;
+}
+.flatpickr-time .flatpickr-time-separator {
+  color: hsl(var(--popover-foreground)) !important;
+}
 
 .text-muted { color: hsl(var(--muted-foreground)); }
 .divider { height: 1px; background: hsl(var(--border)); margin: 0.75rem 0; }
