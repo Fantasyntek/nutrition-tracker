@@ -16,10 +16,16 @@
         <div>
           {{ form.date.label_tag }}
           {{ form.date }}
+          {% if form.date.errors %}
+            <div class="text-sm text-error mt-1">{{ form.date.errors|striptags }}</div>
+          {% endif %}
         </div>
         <div>
           {{ form.weight_kg.label_tag }}
           {{ form.weight_kg }}
+          {% if form.weight_kg.errors %}
+            <div class="text-sm text-error mt-1">{{ form.weight_kg.errors|striptags }}</div>
+          {% endif %}
         </div>
 
         {% if form.errors %}

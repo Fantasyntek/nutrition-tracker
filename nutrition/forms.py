@@ -5,6 +5,7 @@ import datetime as dt
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
 
 from .models import FoodItem, Goal, Meal, MealItem, WeightLog
 
@@ -175,8 +176,17 @@ class WeightLogForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         lang = kwargs.pop("lang", None)
         super().__init__(*args, **kwargs)
+        self._lang = lang
         self.fields["date"].label = _t(lang, "Дата", "Date")
         self.fields["weight_kg"].label = _t(lang, "Вес (кг)", "Weight (kg)")
+
+    def clean_date(self):
+        d = self.cleaned_data.get("date")
+        if d and d > timezone.localdate():
+            raise forms.ValidationError(
+                _t(self._lang, "Нельзя указать будущую дату.", "You can't set a future date.")
+            )
+        return d
 
     def save(self, commit=True, *, user):
         obj = super().save(commit=False)

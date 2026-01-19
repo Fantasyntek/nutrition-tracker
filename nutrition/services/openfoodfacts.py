@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import hashlib
 import requests
 
 
@@ -24,6 +25,17 @@ class OpenFoodFactsClient:
 
     base_url = "https://world.openfoodfacts.org"
 
+    @staticmethod
+    def _cache_key(prefix: str, *, query: str, limit: int) -> str:
+        """
+        Memcached-совместимый ключ (без пробелов/двоеточий/не-ASCII).
+        Также избегаем слишком длинных ключей.
+        """
+        q = (query or "").strip().lower()
+        qh = hashlib.sha256(q.encode("utf-8")).hexdigest()[:16]
+        lim = min(max(limit, 1), 30)
+        return f"{prefix}_v3_{qh}_{lim}"
+
     def search(self, query: str, limit: int = 10) -> list[OffProduct]:
         query = (query or "").strip()
         if not query:
@@ -35,7 +47,7 @@ class OpenFoodFactsClient:
         except Exception:  # pragma: no cover
             cache = None
 
-        cache_key = f"off:search:v2:{query.lower()}:{min(max(limit, 1), 30)}"
+        cache_key = self._cache_key("off_search", query=query, limit=limit)
         if cache is not None:
             cached = cache.get(cache_key)
             if cached is not None:
@@ -58,19 +70,28 @@ class OpenFoodFactsClient:
         }
         url = f"{self.base_url}/cgi/search.pl"
 
-        try:
-            r = requests.get(url, params=params, timeout=8, headers=headers)
+        def _fetch(p: dict) -> dict:
+            r = requests.get(url, params=p, timeout=8, headers=headers)
             r.raise_for_status()
-            data = r.json()
-        except Exception:
+            return r.json()
+
+        last_exc: Exception | None = None
+        try:
+            data = _fetch(params)
+        except Exception as e:
+            last_exc = e
             data = {"products": []}
 
         # Если результатов мало/нет — расширяем поиск без фильтра по стране
         if not (data.get("products") or []):
             params.pop("countries_tags_en", None)
-            r = requests.get(url, params=params, timeout=8, headers=headers)
-            r.raise_for_status()
-            data = r.json()
+            try:
+                data = _fetch(params)
+            except Exception as e:
+                # Если обе попытки упали — пусть view покажет сообщение об ошибке.
+                if last_exc is not None:
+                    raise e
+                data = {"products": []}
 
         products = []
         for p in data.get("products", []) or []:

@@ -143,3 +143,25 @@ class FoodImportValidationTests(TestCase):
         self.assertEqual(r.status_code, 200)
         body = r.content.decode("utf-8")
         self.assertIn("Missing product code.", body)
+
+
+class WeightLogValidationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="u5", password="pass12345")
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_weight_rejects_future_date_ru(self):
+        session = self.client.session
+        session["django_language"] = "ru"
+        session.save()
+
+        future = timezone.localdate() + timezone.timedelta(days=1)
+        r = self.client.post(
+            reverse("nutrition:add_weight"),
+            {"date": future.isoformat(), "weight_kg": "80.0"},
+            follow=True,
+        )
+        self.assertEqual(r.status_code, 200)
+        body = r.content.decode("utf-8")
+        self.assertIn("Нельзя указать будущую дату.", body)
