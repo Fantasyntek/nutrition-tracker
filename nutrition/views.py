@@ -173,6 +173,8 @@ def dashboard(request):
             "predicted_weight": round(predicted_weight, 2),
             "weight_change": round(weight_change_kg, 2),
             "deficit_kcal": round(deficit_kcal, 0),
+            "kcal_abs": round(abs(deficit_kcal), 0),  # Абсолютное значение для отображения
+            "is_deficit": deficit_kcal > 0,  # True если дефицит, False если профицит
         }
 
     context = {

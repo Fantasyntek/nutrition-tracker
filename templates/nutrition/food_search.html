@@ -33,48 +33,59 @@
     </div>
   </div>
 
-  {% if results %}
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-      <div class="card-body">
-        <div class="font-semibold mb-3">{% tr ru="Результаты" en="Results" %}</div>
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>{% tr ru="Название" en="Name" %}</th>
-                <th class="whitespace-nowrap">{% tr ru="Ккал/100г" en="kcal/100g" %}</th>
-                <th class="whitespace-nowrap">{% tr ru="Б/Ж/У" en="P/F/C" %}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for p in results %}
+  {% if form.is_valid %}
+    {% if results %}
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+          <div class="font-semibold mb-3">{% tr ru="Результаты" en="Results" %}</div>
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
                 <tr>
-                  <td>
-                    <div class="font-semibold">{{ p.name }}</div>
-                    {% if p.brand %}<div class="text-sm opacity-70">{{ p.brand }}</div>{% endif %}
-                    <div class="text-xs opacity-60">code: {{ p.code }}</div>
-                  </td>
-                  <td>{{ p.kcal_100g|default:"—" }}</td>
-                  <td class="whitespace-nowrap">
-                    {{ p.protein_100g|default:"—" }} /
-                    {{ p.fat_100g|default:"—" }} /
-                    {{ p.carbs_100g|default:"—" }}
-                  </td>
-                  <td class="text-right">
-                    <form method="post" action="{% url 'nutrition:food_import' %}">
-                      {% csrf_token %}
-                      <input type="hidden" name="code" value="{{ p.code }}" />
-                      <button class="btn btn-outline btn-sm" type="submit">{% tr ru="Импортировать" en="Import" %}</button>
-                    </form>
-                  </td>
+                  <th>{% tr ru="Название" en="Name" %}</th>
+                  <th class="whitespace-nowrap">{% tr ru="Ккал/100г" en="kcal/100g" %}</th>
+                  <th class="whitespace-nowrap">{% tr ru="Б/Ж/У" en="P/F/C" %}</th>
+                  <th></th>
                 </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for p in results %}
+                  <tr>
+                    <td>
+                      <div class="font-semibold">{{ p.name }}</div>
+                      {% if p.brand %}<div class="text-sm opacity-70">{{ p.brand }}</div>{% endif %}
+                      <div class="text-xs opacity-60">code: {{ p.code }}</div>
+                    </td>
+                    <td>{{ p.kcal_100g|default:"—" }}</td>
+                    <td class="whitespace-nowrap">
+                      {{ p.protein_100g|default:"—" }} /
+                      {{ p.fat_100g|default:"—" }} /
+                      {{ p.carbs_100g|default:"—" }}
+                    </td>
+                    <td class="text-right">
+                      <form method="post" action="{% url 'nutrition:food_import' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="code" value="{{ p.code }}" />
+                        <button class="btn btn-outline btn-sm" type="submit">{% tr ru="Импортировать" en="Import" %}</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    {% else %}
+      <div class="alert alert-warning border-2 border-warning bg-warning/20 text-warning-content">
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="font-semibold">{% tr ru="Товар не найден" en="Product not found" %}</span>
+        </div>
+      </div>
+    {% endif %}
   {% endif %}
 {% endblock %}
 

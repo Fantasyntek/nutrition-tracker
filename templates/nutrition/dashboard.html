@@ -80,7 +80,7 @@
         {% if weight_forecast %}
           <div class="divider my-1"></div>
           <div>
-            <div class="font-semibold mb-1">{% tr ru="Прогноз веса" en="Weight forecast" %}</div>
+            <div class="font-semibold mb-1">{% tr ru="Прогноз веса на следующий день" en="Weight forecast for next day" %}</div>
             <div class="text-xl font-bold">{{ weight_forecast.predicted_weight }} {% tr ru="кг" en="kg" %}</div>
             <div class="text-sm opacity-70">
               {% if weight_forecast.weight_change > 0 %}
@@ -88,7 +88,11 @@
               {% else %}
                 {{ weight_forecast.weight_change }} {% tr ru="кг" en="kg" %}
               {% endif %}
-              ({% tr ru="дефицит" en="deficit" %}: {{ weight_forecast.deficit_kcal }} {% tr ru="ккал" en="kcal" %})
+              {% if weight_forecast.is_deficit %}
+                ({% tr ru="дефицит" en="deficit" %}: {{ weight_forecast.kcal_abs }} {% tr ru="ккал" en="kcal" %})
+              {% else %}
+                ({% tr ru="профицит" en="surplus" %}: {{ weight_forecast.kcal_abs }} {% tr ru="ккал" en="kcal" %})
+              {% endif %}
             </div>
           </div>
         {% endif %}
